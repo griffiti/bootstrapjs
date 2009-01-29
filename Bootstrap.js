@@ -368,7 +368,7 @@ Bootstrap = function() {
             _startTime = now.getTime();
 
             // Load default bootstrap if not defined.
-			if (typeof bootstrap == 'undefined') {
+			if (typeof bootstrap == 'undefined' || typeof bootstrap != String) {
                 bootstrap = 'bootstrap.txt';
             }
 
@@ -459,5 +459,4 @@ Bootstrap = function() {
     };
 }();
 
-window.onload = function() { Bootstrap.run(); }
-
+window.onload = Bootstrap.run;
