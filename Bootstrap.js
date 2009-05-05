@@ -443,12 +443,10 @@ Bootstrap = function() {
         },
 
         log: function(message) {
-			var timestamp = parseTimeStamp(new Date());
-			
-			if (console) {
+			if (typeof(console) != 'undefined') {
+                var timestamp = parseTimeStamp(new Date());
+                
 				console.log(timestamp + ' - ' + message);
-			} else {
-				alert(timestamp + ' - ' + message);
 			}
         },
 		
