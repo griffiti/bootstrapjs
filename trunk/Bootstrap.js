@@ -258,8 +258,7 @@ Bootstrap = function() {
                     head.appendChild(element);
                 }
                 
-                var loaded = isScriptLoaded(script.uri, script.test);
-                window.setTimeout(loaded, 500);
+                isScriptLoaded(script.uri, script.test);
             }
         } catch (err) {
             Bootstrap.log(err);
@@ -281,17 +280,19 @@ Bootstrap = function() {
 
         return selectedBootGroup;
     };
-	
-	var isScriptLoaded = function(script, test) {
-		return (function() {
-			if ('undefined' == eval('typeof ' + test)) {
-				var loaded = isScriptLoaded(script, test);
-				window.setTimeout(loaded, 500);
-			} else {
-				scriptLoaded(script);
-			}
-		});
-	};
+    
+    var isScriptLoaded = function(script, test) {
+        // Accomodate namespaces.
+        var namespaces = test.split(".");
+        
+        if ((namespaces.length > 1 ? (typeof(window[namespaces[0]]) == 'undefined' ? false : true) : true) && (eval('typeof ' + test) == 'undefined' ? false : true)) {
+            scriptLoaded(script);
+        } else {
+            window.setTimeout(function() {
+                isScriptLoaded(script, test);
+            }, 50);
+        }
+    }
 	
     /**
      * Marks a script as loaded. Checks if all scripts have loaded and
