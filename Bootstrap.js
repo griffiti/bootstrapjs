@@ -12,6 +12,7 @@ Bootstrap = function() {
 	var _bootstrap           = null;
 	var _animTarget          = null;
 	var _splashDiv           = null;
+    var _loaderDiv           = null;
     var _loadedScripts       = new Array();
     var _currentBootSequence = 0;
     var _startTime           = null;
@@ -158,31 +159,37 @@ Bootstrap = function() {
     };
 	
     var buildSplashScreen = function() {
-		// setup splash div
+        // setup splash div
         _splashDiv = document.createElement('div');
         _splashDiv.setAttribute('id', 'splash');
-		setSplashDivStyle();
+        setSplashDivStyle();
         
         // setup nested version div
         // TODO: Add check for version existence.
         var versionDiv = document.createElement('div');
         versionDiv.setAttribute('id', 'splash-version');
         versionDiv.innerHTML = _bootstrap.versionLabel + ' ' + _bootstrap.versionNumber;
-		setSplashChildDivStyle(versionDiv, _bootstrap.splash.version);
+        setSplashChildDivStyle(versionDiv, _bootstrap.splash.version);
         _splashDiv.appendChild(versionDiv);
+        
+        // setup loader div
+        _loaderDiv = document.createElement('div');
+        _loaderDiv.setAttribute('id', 'splash-loader');
+        setLoaderDivStyle();
+        _splashDiv.appendChild(_loaderDiv);
 
-		// setup nested message div
+        // setup nested message div
         // TODO: Add check for message existence.
         var messageDiv = document.createElement('div');
         messageDiv.setAttribute('id', 'splash-message');
-		setSplashChildDivStyle(messageDiv, _bootstrap.splash.message);
+        setSplashChildDivStyle(messageDiv, _bootstrap.splash.message);
         _splashDiv.appendChild(messageDiv);
 
-		// center splash div in browser
-		centerSplashDiv();
+        // center splash div in browser
+        centerSplashDiv();
 
-		// render splash div
-		var body = document.getElementById(_bootstrap.bodyTag);
+        // render splash div
+        var body = document.getElementById(_bootstrap.bodyTag);
         body.appendChild(_splashDiv);
     };
 	
@@ -192,10 +199,22 @@ Bootstrap = function() {
 		_splashDiv.style.position = splash.position;
 		_splashDiv.style.border = splash.border;
 		_splashDiv.style.background = splash.background;
-		_splashDiv.style.width = splash.width + "px";
-		_splashDiv.style.height = splash.height + "px";
+		_splashDiv.style.width = splash.width;
+		_splashDiv.style.height = splash.height;
 		_splashDiv.style.zIndex = splash.zIndex;
 	};
+    
+    var setLoaderDivStyle = function() {
+        var loader = _bootstrap.splash.loader;
+        
+        _loaderDiv.style.position = loader.position;
+        _loaderDiv.style.top = loader.top;
+        _loaderDiv.style.left = loader.left;
+        _loaderDiv.style.border = loader.border;
+        _loaderDiv.style.background = loader.background;
+        _loaderDiv.style.width = loader.width;
+        _loaderDiv.style.height = loader.height;
+    };
     
     var setSplashChildDivStyle = function(div, config) {
         div.style.position = config.position;
@@ -473,13 +492,20 @@ Bootstrap = function() {
         	return (_splashDiv.style.visibility == 'visible');
         },
 		
-		showSplash: function() {
-			_splashDiv.style.visibility = 'visible';
-		},
-		
-		hideSplash: function() {
-			_splashDiv.style.visibility = 'hidden';
-		},
+		showSplash: function(hideLoader) {
+            _splashDiv.style.visibility = 'visible';
+            
+            if ((typeof(hideLoader) != 'undefined') && hideLoader) {
+                _loaderDiv.style.visibility = 'hidden';
+            } else {
+                _loaderDiv.style.visibility = 'visible';
+            }
+        },
+        
+        hideSplash: function() {
+            _splashDiv.style.visibility = 'hidden';
+            _loaderDiv.style.visibility = 'hidden';
+        },
 
         /**
          * Loads dependent scripts from server in boot order.
