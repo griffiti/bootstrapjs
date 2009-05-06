@@ -407,7 +407,7 @@ Bootstrap = function() {
         // Parse for bootstrap param.
         var query = unescape(uri.query);
         var params = query.split('&');
-        for (i = 0; i < params.length; i++) {
+        for (var i = 0; i < params.length; i++) {
             var param = params[i].split('=');
             if (param[0] == 'bootstrap') {
                 bootstrap = typeof param[1] == 'undefined' || param[1] == '' ? null : param[1];
