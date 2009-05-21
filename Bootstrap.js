@@ -260,24 +260,39 @@ Bootstrap = function() {
             Bootstrap.setSplashMessage((bootGroup.message || 'Loading libraries...'));
             
             for (var i = 0; i < bootGroup.files.length; i++) {
+                // Grab file object.
                 var script = bootGroup.files[i];
                 
-                var element = null;
-                element = document.createElement('script');
-                element.setAttribute('type', 'text/javascript');
-                
+                // Setup cache supported uri.
+                var uri = null;
                 if (bootGroup.cache || script.cache) {
-                    element.setAttribute('src', script.uri);
+                    uri = script.uri;
                 }
                 else { // add cache buster
-                    element.setAttribute('src', script.uri + '?' + new Date().getTime());
+                    uri = script.uri + '?' + new Date().getTime();
                 }
+                
+                // Setup DOM element based on boot group type.
+                var element = null;
+                if (bootGroup.type == 'js') {
+	                element = document.createElement('script');
+	                element.setAttribute('type', 'text/javascript');
+					element.setAttribute('src', uri);
+	            }
+	            if (bootGroup.type == 'css') {
+	                element = document.createElement('link');
+	                element.setAttribute('type', 'text/css');
+                    element.setAttribute('rel', 'stylesheet')
+					element.setAttribute('href', uri);
+	            }
                 
                 if (element) {
                     head.appendChild(element);
                 }
                 
-                isScriptLoaded(script.uri, script.test);
+                // Start polling for loaded script.
+                if (bootGroup.type == 'js') isScriptLoaded(script.uri, script.test);
+                if (bootGroup.type == 'css') isStyleLoaded(script.uri, script.test);
             }
         } catch (err) {
             Bootstrap.log(err);
@@ -311,7 +326,34 @@ Bootstrap = function() {
                 isScriptLoaded(script, test);
             }, 50);
         }
-    }
+    };
+    
+    var isStyleLoaded = function(script, test) {
+        // Grab all existing stylesheets.
+        var sheets = document.styleSheets;
+        
+        // Parse all existing rules.
+        var rules = {};
+        for (var i = 0, len = sheets.length; i < len; i++) {
+            try {
+                var sheet = sheets[i];
+                
+				var sheetRules = sheet.cssRules || sheet.rules;
+				for (var j = sheetRules.length-1; j >= 0; --j) {
+				    rules[sheetRules[j].selectorText] = sheetRules[j];
+				}
+            } catch (e) {} 
+        }
+        
+        // Check for existence of test selector.
+        if (rules[test]) {
+            scriptLoaded(script);
+        } else {
+            window.setTimeout(function() {
+                isStyleLoaded(script, test);
+            }, 50);
+        }
+    };
 	
     /**
      * Marks a script as loaded. Checks if all scripts have loaded and
