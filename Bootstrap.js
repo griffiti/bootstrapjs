@@ -266,10 +266,10 @@ Bootstrap = function() {
                 element = document.createElement('script');
                 element.setAttribute('type', 'text/javascript');
                 
-                if (bootGroup.cache) {
+                if (bootGroup.cache || script.cache) {
                     element.setAttribute('src', script.uri);
                 }
-                else {
+                else { // add cache buster
                     element.setAttribute('src', script.uri + '?' + new Date().getTime());
                 }
                 
