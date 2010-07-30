@@ -496,7 +496,7 @@ Bootstrap = function() {
 
             // Load default bootstrap if not defined.
             if (bootstrap == null) {
-                bootstrap = 'bootstrap.txt';
+                bootstrap = 'bootstrap.json';
             }
 
             // Load bootstrap.
