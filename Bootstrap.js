@@ -1,7 +1,7 @@
 /**
  * Bootstrap is an immediate self-invoked singleton class instance providing application startup
  * features, such as dynamic loading of CSS and JavaScript files. Boot sequence support, loaded script
- * support, and on demand script loading.
+ * support, on demand script loading, and splash screen support.
  *
  * @author Jonathan Griffin
  * @class Bootstrap
