@@ -20,6 +20,26 @@ Bootstrap = function() {
 	var _activeX             = ['MSXML2.XMLHTTP.3.0','MSXML2.XMLHTTP','Microsoft.XMLHTTP']
 
 
+    /**
+     * Browser checks taken and modified from ExtJS source.
+     *
+     * Ext JS Library 3.3.1
+     * Copyright(c) 2006-2010 Sencha Inc.
+     * licensing@sencha.com
+     * http://www.sencha.com/license
+     */
+    var _docMode = document.documentMode;
+    var _ua = navigator.userAgent.toLowerCase();
+    var check = function(r) {
+        return r.test(_ua);
+    };
+    var _isOpera = check(/opera/);
+    var _isIE = !_isOpera && check(/msie/);
+    var _isIE7 = _isIE && (check(/msie 7/) || _docMode == 7);
+    var _isIE8 = _isIE && (check(/msie 8/) && _docMode != 7);
+    var _isIE6 = _isIE && !_isIE7 && !_isIE8;
+
+
 
     /** PRIVATE METHODS */
 	var createXMLHttpRequest = function() {
@@ -262,28 +282,28 @@ Bootstrap = function() {
             for (var i = 0; i < bootGroup.files.length; i++) {
                 // Grab file object.
                 var script = bootGroup.files[i];
-                
-                // Setup cache supported uri.
-                var uri = null;
-                if (bootGroup.cache || script.cache) {
-                    uri = script.uri;
-                }
-                else { // add cache buster
-                    uri = script.uri + '?' + new Date().getTime();
-                }
+
+                var altIEScriptConfig = getAltIEScriptConfig(script);
+
+                var uri = altIEScriptConfig.ieUri == null ? script.uri : altIEScriptConfig.ieUri;
+                var test = altIEScriptConfig.ieTest == null ? script.test : altIEScriptConfig.ieTest;
+
+                // Support group level caching with script level override.
+                var cache = bootGroup.cache;
+                if (typeof script.cache !== 'undefined') cache = script.cache;
                 
                 // Setup DOM element based on boot group type.
                 var element = null;
                 if (bootGroup.type == 'js') {
 	                element = document.createElement('script');
 	                element.setAttribute('type', 'text/javascript');
-					element.setAttribute('src', uri);
+                    element.setAttribute('src', (cache ? uri : uri + '?' + new Date().getTime()));
 	            }
 	            if (bootGroup.type == 'css') {
 	                element = document.createElement('link');
 	                element.setAttribute('type', 'text/css');
-                    element.setAttribute('rel', 'stylesheet')
-					element.setAttribute('href', uri);
+                    element.setAttribute('rel', 'stylesheet');
+                    element.setAttribute('href', (cache ? uri : uri + '?' + new Date().getTime()));
 	            }
                 
                 if (element) {
@@ -291,13 +311,50 @@ Bootstrap = function() {
                 }
                 
                 // Start polling for loaded script.
-                if (bootGroup.type == 'js') isScriptLoaded(script.uri, script.test);
-                if (bootGroup.type == 'css') isStyleLoaded(script.uri, script.test);
+                if (bootGroup.type == 'js') isScriptLoaded(uri, test);
+                if (bootGroup.type == 'css') isStyleLoaded(uri, test);
             }
         } catch (err) {
             Bootstrap.log(err);
         }
 	};
+
+    /**
+     * Support alternate IE uri (with optional version support).
+     * Support alternate IE test (with optional version support).
+     * @param script
+     * @return {Object} config
+     */
+    var getAltIEScriptConfig = function(script) {
+        var config = {
+            ieUri: null,
+            ieTest: null
+        };
+
+        // Support alternate IE uri (with optional version support).
+        if (typeof script.ieUri !== 'undefined' && _isIE) {
+            if (typeof script.ieVersion !== 'undefined') {
+                if (script.ieVersion == '6' && _isIE6) config.ieUri = script.ieUri;
+                if (script.ieVersion == '7' && _isIE7) config.ieUri = script.ieUri;
+                if (script.ieVersion == '8' && _isIE8) config.ieUri = script.ieUri;
+            } else {
+                config.ieUri = script.ieUri;
+            }
+        }
+
+        // Support alternate IE test (with optional version support).
+        if (typeof script.ieTest !== 'undefined' && _isIE) {
+            if (typeof script.ieVersion !== 'undefined') {
+                if (script.ieVersion == '6' && _isIE6) config.ieTest = script.ieTest;
+                if (script.ieVersion == '7' && _isIE7) config.ieTest = script.ieTest;
+                if (script.ieVersion == '8' && _isIE8) config.ieTest = script.ieTest;
+            } else {
+                config.ieTest = script.ieTest;
+            }
+        }
+
+        return config;
+    };
 	
     var fetchBootGroup = function(name) {
         var bootGroups = _bootstrap.bootGroups;
@@ -583,7 +640,11 @@ Bootstrap = function() {
         	
         	// Iterate through bootGroup, checking each file against loaded scripts.
         	for (var i = 0; i < bootGroup.files.length; i++) {
-        		if (checkLoadedScript(bootGroup.files[i].uri)) {
+                var script = bootGroup.files[i];
+                var altIEScriptConfig = getAltIEScriptConfig(script);
+                var uri = altIEScriptConfig.ieUri == null ? script.uri : altIEScriptConfig.ieUri;
+
+        		if (checkLoadedScript(uri)) {
         			scriptsLoaded++;
         		}
         	}
