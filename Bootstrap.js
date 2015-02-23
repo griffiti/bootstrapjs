@@ -1,7 +1,7 @@
 /**
- * BootstrapJS is an immediate self-invoked singleton class instance providing application startup
+ * Bootstrap is an immediate self-invoked singleton class instance providing application startup
  * features, such as dynamic loading of CSS and JavaScript files. Boot sequence support, loaded script
- * support, on demand script loading, browser and version dependency, and splash screen support.
+ * support, and on demand script loading.
  *
  * @author Jonathan Griffin
  * @class Bootstrap
@@ -18,26 +18,6 @@ Bootstrap = function() {
     var _startTime           = null;
     var _finishTime          = null;
 	var _activeX             = ['MSXML2.XMLHTTP.3.0','MSXML2.XMLHTTP','Microsoft.XMLHTTP']
-
-
-    /**
-     * Browser checks taken and modified from ExtJS source.
-     *
-     * Ext JS Library 3.3.1
-     * Copyright(c) 2006-2010 Sencha Inc.
-     * licensing@sencha.com
-     * http://www.sencha.com/license
-     */
-    var _docMode = document.documentMode;
-    var _ua = navigator.userAgent.toLowerCase();
-    var check = function(r) {
-        return r.test(_ua);
-    };
-    var _isOpera = check(/opera/);
-    var _isIE = !_isOpera && check(/msie/);
-    var _isIE7 = _isIE && (check(/msie 7/) || _docMode == 7);
-    var _isIE8 = _isIE && (check(/msie 8/) && _docMode != 7);
-    var _isIE6 = _isIE && !_isIE7 && !_isIE8;
 
 
 
@@ -205,22 +185,12 @@ Bootstrap = function() {
         setSplashChildDivStyle(messageDiv, _bootstrap.splash.message);
         _splashDiv.appendChild(messageDiv);
 
-        // setup nested copyright div
-        // TODO: Add check for copyright existence.
-        var copyrightDiv = document.createElement('div');
-        copyrightDiv.setAttribute('id', 'copyright-message');
-        setSplashChildDivStyle(copyrightDiv, _bootstrap.splash.copyright);
-        _splashDiv.appendChild(copyrightDiv);
-
         // center splash div in browser
         centerSplashDiv();
 
         // render splash div
         var body = document.getElementById(_bootstrap.bodyTag);
         body.appendChild(_splashDiv);
-
-        // set copyright
-        Bootstrap.setCopyrightMessage(_bootstrap.copyrightMessage);
     };
 	
 	var setSplashDivStyle = function() {
@@ -290,81 +260,29 @@ Bootstrap = function() {
             Bootstrap.setSplashMessage((bootGroup.message || 'Loading libraries...'));
             
             for (var i = 0; i < bootGroup.files.length; i++) {
-                // Grab file object.
                 var script = bootGroup.files[i];
-
-                var altIEScriptConfig = getAltIEScriptConfig(script);
-
-                var uri = altIEScriptConfig.ieUri == null ? script.uri : altIEScriptConfig.ieUri;
-                var test = altIEScriptConfig.ieTest == null ? script.test : altIEScriptConfig.ieTest;
-
-                // Support group level caching with script level override.
-                var cache = bootGroup.cache;
-                if (typeof script.cache !== 'undefined') cache = script.cache;
                 
-                // Setup DOM element based on boot group type.
                 var element = null;
-                if (bootGroup.type == 'js') {
-	                element = document.createElement('script');
-	                element.setAttribute('type', 'text/javascript');
-                    element.setAttribute('src', (cache ? uri : uri + '?' + new Date().getTime()));
-	            }
-	            if (bootGroup.type == 'css') {
-	                element = document.createElement('link');
-	                element.setAttribute('type', 'text/css');
-                    element.setAttribute('rel', 'stylesheet');
-                    element.setAttribute('href', (cache ? uri : uri + '?' + new Date().getTime()));
-	            }
+                element = document.createElement('script');
+                element.setAttribute('type', 'text/javascript');
+                
+                if (bootGroup.cache) {
+                    element.setAttribute('src', script.uri);
+                }
+                else {
+                    element.setAttribute('src', script.uri + '?' + new Date().getTime());
+                }
                 
                 if (element) {
                     head.appendChild(element);
                 }
                 
-                // Start polling for loaded script.
-                if (bootGroup.type == 'js') isScriptLoaded(uri, test);
-                if (bootGroup.type == 'css') isStyleLoaded(uri, test);
+                isScriptLoaded(script.uri, script.test);
             }
         } catch (err) {
             Bootstrap.log(err);
         }
 	};
-
-    /**
-     * Support alternate IE uri (with optional version support).
-     * Support alternate IE test (with optional version support).
-     * @param script
-     * @return {Object} config
-     */
-    var getAltIEScriptConfig = function(script) {
-        var config = {
-            ieUri: null,
-            ieTest: null
-        };
-
-        // Support alternate IE uri (with optional version support).
-        if (typeof script.ieUri !== 'undefined' && _isIE) {
-            if (typeof script.ieVersion !== 'undefined') {
-                if (script.ieVersion == '6' && _isIE6) config.ieUri = script.ieUri;
-                if (script.ieVersion == '7' && _isIE7) config.ieUri = script.ieUri;
-                if (script.ieVersion == '8' && _isIE8) config.ieUri = script.ieUri;
-            } else {
-                config.ieUri = script.ieUri;
-            }
-        }
-
-        // Support alternate IE test (with optional version support).
-        if (typeof script.ieTest !== 'undefined' && _isIE) {
-            if (typeof script.ieVersion !== 'undefined') {
-                if (script.ieVersion == '6' && _isIE6) config.ieTest = script.ieTest;
-                if (script.ieVersion == '7' && _isIE7) config.ieTest = script.ieTest;
-                if (script.ieVersion == '8' && _isIE8) config.ieTest = script.ieTest;
-            } else {
-                config.ieTest = script.ieTest;
-            }
-        }
-
-        return config;
-    };
 	
     var fetchBootGroup = function(name) {
         var bootGroups = _bootstrap.bootGroups;
@@ -393,34 +311,7 @@ Bootstrap = function() {
                 isScriptLoaded(script, test);
             }, 50);
         }
-    };
-    
-    var isStyleLoaded = function(script, test) {
-        // Grab all existing stylesheets.
-        var sheets = document.styleSheets;
-        
-        // Parse all existing rules.
-        var rules = {};
-        for (var i = 0, len = sheets.length; i < len; i++) {
-            try {
-                var sheet = sheets[i];
-                
-				var sheetRules = sheet.cssRules || sheet.rules;
-				for (var j = sheetRules.length-1; j >= 0; --j) {
-				    rules[sheetRules[j].selectorText] = sheetRules[j];
-				}
-            } catch (e) {} 
-        }
-        
-        // Check for existence of test selector.
-        if (rules[test]) {
-            scriptLoaded(script);
-        } else {
-            window.setTimeout(function() {
-                isStyleLoaded(script, test);
-            }, 50);
-        }
-    };
+    }
 	
     /**
      * Marks a script as loaded. Checks if all scripts have loaded and
@@ -563,7 +454,7 @@ Bootstrap = function() {
 
             // Load default bootstrap if not defined.
             if (bootstrap == null) {
-                bootstrap = 'bootstrap.json';
+                bootstrap = 'bootstrap.txt';
             }
 
             // Load bootstrap.
@@ -616,13 +507,6 @@ Bootstrap = function() {
             _loaderDiv.style.visibility = 'hidden';
         },
 
-        setCopyrightMessage: function(message) {
-            var copyrighthMessage = document.getElementById('copyright-message');
-            if (copyrighthMessage != null) {
-                copyrighthMessage.innerHTML = message;
-            }
-        },
-
         /**
          * Loads dependent scripts from server in boot order.
          */
@@ -657,11 +541,7 @@ Bootstrap = function() {
         	
         	// Iterate through bootGroup, checking each file against loaded scripts.
         	for (var i = 0; i < bootGroup.files.length; i++) {
-                var script = bootGroup.files[i];
-                var altIEScriptConfig = getAltIEScriptConfig(script);
-                var uri = altIEScriptConfig.ieUri == null ? script.uri : altIEScriptConfig.ieUri;
-
-        		if (checkLoadedScript(uri)) {
+        		if (checkLoadedScript(bootGroup.files[i].uri)) {
         			scriptsLoaded++;
         		}
         	}
