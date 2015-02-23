@@ -205,12 +205,22 @@ Bootstrap = function() {
         setSplashChildDivStyle(messageDiv, _bootstrap.splash.message);
         _splashDiv.appendChild(messageDiv);
 
+        // setup nested copyright div
+        // TODO: Add check for copyright existence.
+        var copyrightDiv = document.createElement('div');
+        copyrightDiv.setAttribute('id', 'copyright-message');
+        setSplashChildDivStyle(copyrightDiv, _bootstrap.splash.copyright);
+        _splashDiv.appendChild(copyrightDiv);
+
         // center splash div in browser
         centerSplashDiv();
 
         // render splash div
         var body = document.getElementById(_bootstrap.bodyTag);
         body.appendChild(_splashDiv);
+
+        // set copyright
+        Bootstrap.setCopyrightMessage(_bootstrap.copyrightMessage);
     };
 	
 	var setSplashDivStyle = function() {
@@ -604,6 +614,13 @@ Bootstrap = function() {
         hideSplash: function() {
             _splashDiv.style.visibility = 'hidden';
             _loaderDiv.style.visibility = 'hidden';
+        },
+
+        setCopyrightMessage: function(message) {
+            var copyrighthMessage = document.getElementById('copyright-message');
+            if (copyrighthMessage != null) {
+                copyrighthMessage.innerHTML = message;
+            }
         },
 
         /**
