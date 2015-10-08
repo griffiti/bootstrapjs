@@ -3,7 +3,7 @@
  * features, such as dynamic loading of CSS and JavaScript files. Boot sequence support, loaded script
  * support, on demand script loading, browser and version dependency, and splash screen support.
  *
- * @author Jonathan Griffin
+ * @author Jonathan Griffin <griffiti93@gmail.com>
  * @class Bootstrap
  * @singleton
  */
@@ -65,26 +65,26 @@ Bootstrap = function() {
             return http;
         }
 	};
-	
+
     var requestURL = function(xmlReq, url, cached, callback) {
         if (xmlReq == null) {
 			alert('Error loading application. Your browser may not support AJAX.');
 			return;
 		}
-		
+
 		// Support for disabling browser caching.
 		if (!cached) {
 			url = url + '?' + new Date().getTime();
 		}
-		
+
 		// Setup request callback.
 		xmlReq.onreadystatechange = callback;
-		
+
 		// Make request.
         xmlReq.open("GET", url, true);
         xmlReq.send(null);
     };
-	
+
 	var loadBootstrap = function(bootstrap) {
 		// load bootstrap from object literal
 		if (typeof bootstrap == 'object') {
@@ -98,10 +98,10 @@ Bootstrap = function() {
 			var callback = bootstrapCallback(xmlReq);
 			requestURL(xmlReq, bootstrap, false, callback);
         }
-		
+
 		return;
 	};
-	
+
 	var bootstrapCallback = function(xmlReq) {
 		return (function() {
 			if (xmlReq.readyState == 4) {
@@ -112,7 +112,7 @@ Bootstrap = function() {
 	        }
 		});
 	};
-	
+
 	var init = function() {
 		try {
             if (typeof _bootstrap.bootOrder == 'undefined') {
@@ -125,16 +125,16 @@ Bootstrap = function() {
 			}
 
 	        buildAnimTarget();
-			
+
 			buildSplashScreen();
-            
+
             addEventHandlers();
-			
+
 			window.setTimeout(Bootstrap.loadScripts, 250);
 
 	    } catch (e) { alert(e); }
 	};
-	
+
     /**
      * Ensure application window is opened from launcher. The try/catch statement
      * protects permission denied errors thrown if trying to access a window.opener
@@ -164,7 +164,7 @@ Bootstrap = function() {
             window.location = _bootstrap.launchRedirect;
         }
     };
-	
+
     /**
      * Location holder for animation target used for animated elements.
      */
@@ -177,13 +177,13 @@ Bootstrap = function() {
         var body = document.getElementById(_bootstrap.bodyTag);
         body.appendChild(_animTarget);
     };
-	
+
     var buildSplashScreen = function() {
         // setup splash div
         _splashDiv = document.createElement('div');
         _splashDiv.setAttribute('id', 'splash');
         setSplashDivStyle();
-        
+
         // setup nested version div
         // TODO: Add check for version existence.
         var versionDiv = document.createElement('div');
@@ -191,7 +191,7 @@ Bootstrap = function() {
         versionDiv.innerHTML = _bootstrap.versionLabel + ' ' + _bootstrap.versionNumber;
         setSplashChildDivStyle(versionDiv, _bootstrap.splash.version);
         _splashDiv.appendChild(versionDiv);
-        
+
         // setup loader div
         _loaderDiv = document.createElement('div');
         _loaderDiv.setAttribute('id', 'splash-loader');
@@ -222,21 +222,21 @@ Bootstrap = function() {
         // set copyright
         Bootstrap.setCopyrightMessage(_bootstrap.copyrightMessage);
     };
-	
+
 	var setSplashDivStyle = function() {
 		var splash = _bootstrap.splash;
-		
+
 		_splashDiv.style.position = splash.position;
 		_splashDiv.style.border = splash.border;
 		_splashDiv.style.background = splash.background;
-		_splashDiv.style.width = splash.width;
-		_splashDiv.style.height = splash.height;
+		_splashDiv.style.width = splash.width + 'px';
+		_splashDiv.style.height = splash.height + 'px';
 		_splashDiv.style.zIndex = splash.zIndex;
 	};
-    
+
     var setLoaderDivStyle = function() {
         var loader = _bootstrap.splash.loader;
-        
+
         _loaderDiv.style.position = loader.position;
         _loaderDiv.style.top = loader.top;
         _loaderDiv.style.left = loader.left;
@@ -245,7 +245,7 @@ Bootstrap = function() {
         _loaderDiv.style.width = loader.width;
         _loaderDiv.style.height = loader.height;
     };
-    
+
     var setSplashChildDivStyle = function(div, config) {
         div.style.position = config.position;
 		div.style.top = config.top;
@@ -258,37 +258,38 @@ Bootstrap = function() {
 		div.style.textAlign = config.textAlign;
         div.style.color = config.color;
     };
-	
+
 	var centerSplashDiv = function() {
-		var centerTop = (document.body.clientHeight - _bootstrap.splash.height) / 2;
+		// var centerTop = (document.body.clientHeight - _bootstrap.splash.height) / 2;
+        var centerTop = (window.innerHeight - _bootstrap.splash.height) / 2;
         var centerLeft = (document.body.clientWidth - _bootstrap.splash.width) / 2;
-        
-		_splashDiv.style.left = centerLeft + document.body.scrollLeft;
-        _splashDiv.style.top = centerTop + document.body.scrollTop;
+
+		_splashDiv.style.left = centerLeft + document.body.scrollLeft + 'px';
+        _splashDiv.style.top = centerTop + document.body.scrollTop + 'px';
 	};
-    
+
     var addEventHandlers = function() {
         // Wire up resize event
         window.onresize = centerSplashDiv;
     };
-    
+
     var removeEventHandlers = function() {
         // Remove resize event handler
         window.onresize = null;
     };
-	
+
 	var loadBootGroup = function(name) {
         try {
             var head = document.getElementsByTagName('head')[0];
-            
+
             var bootGroup = fetchBootGroup(name);
-            
+
             // Capture boot group start time.
             var now = new Date();
             bootGroup.startTime = now.getTime();
-            
+
             Bootstrap.setSplashMessage((bootGroup.message || 'Loading libraries...'));
-            
+
             for (var i = 0; i < bootGroup.files.length; i++) {
                 // Grab file object.
                 var script = bootGroup.files[i];
@@ -301,7 +302,7 @@ Bootstrap = function() {
                 // Support group level caching with script level override.
                 var cache = bootGroup.cache;
                 if (typeof script.cache !== 'undefined') cache = script.cache;
-                
+
                 // Setup DOM element based on boot group type.
                 var element = null;
                 if (bootGroup.type == 'js') {
@@ -315,11 +316,11 @@ Bootstrap = function() {
                     element.setAttribute('rel', 'stylesheet');
                     element.setAttribute('href', (cache ? uri : uri + '?' + new Date().getTime()));
 	            }
-                
+
                 if (element) {
                     head.appendChild(element);
                 }
-                
+
                 // Start polling for loaded script.
                 if (bootGroup.type == 'js') isScriptLoaded(uri, test);
                 if (bootGroup.type == 'css') isStyleLoaded(uri, test);
@@ -365,7 +366,7 @@ Bootstrap = function() {
 
         return config;
     };
-	
+
     var fetchBootGroup = function(name) {
         var bootGroups = _bootstrap.bootGroups;
         var selectedBootGroup = null;
@@ -381,11 +382,11 @@ Bootstrap = function() {
 
         return selectedBootGroup;
     };
-    
+
     var isScriptLoaded = function(script, test) {
         // Accomodate namespaces.
         var namespaces = test.split(".");
-        
+
         if ((namespaces.length > 1 ? (typeof(window[namespaces[0]]) == 'undefined' ? false : true) : true) && (eval('typeof ' + test) == 'undefined' ? false : true)) {
             scriptLoaded(script);
         } else {
@@ -394,24 +395,24 @@ Bootstrap = function() {
             }, 50);
         }
     };
-    
+
     var isStyleLoaded = function(script, test) {
         // Grab all existing stylesheets.
         var sheets = document.styleSheets;
-        
+
         // Parse all existing rules.
         var rules = {};
         for (var i = 0, len = sheets.length; i < len; i++) {
             try {
                 var sheet = sheets[i];
-                
+
 				var sheetRules = sheet.cssRules || sheet.rules;
 				for (var j = sheetRules.length-1; j >= 0; --j) {
 				    rules[sheetRules[j].selectorText] = sheetRules[j];
 				}
-            } catch (e) {} 
+            } catch (e) {}
         }
-        
+
         // Check for existence of test selector.
         if (rules[test]) {
             scriptLoaded(script);
@@ -421,7 +422,7 @@ Bootstrap = function() {
             }, 50);
         }
     };
-	
+
     /**
      * Marks a script as loaded. Checks if all scripts have loaded and
      * performs applicable callbacks.
@@ -439,16 +440,16 @@ Bootstrap = function() {
 
 		// Grab current boot group.
 		var bootGroup = fetchBootGroup(_bootstrap.bootOrder[_currentBootSequence]);
-		
+
 		// Capture boot group end time.
 		var now = new Date();
         bootGroup.finishTime = now.getTime();
-		
+
 		// Run boot group callback if applicable.
 		if (bootGroup.callback) {
 			eval(bootGroup.callback).call();
 		}
-		
+
         // Since boot group is loaded, increment current boot group.
         _currentBootSequence++;
 
@@ -456,7 +457,7 @@ Bootstrap = function() {
         if (_currentBootSequence == _bootstrap.bootOrder.length) {
 			// Capture global end time.
 		    _finishTime = now.getTime();
-			
+
 			if (_bootstrap.debug) { Bootstrap.report(); }
 
 			// Run global callback if applicable.
@@ -464,14 +465,14 @@ Bootstrap = function() {
                 if (typeof _bootstrap.callback == 'function') { _bootstrap.callback.call(); }
                 if (typeof _bootstrap.callback == 'string') { eval(_bootstrap.callback+'.call()'); }
             }
-            
+
             removeEventHandlers();
-            
+
         } else {
             window.setTimeout(Bootstrap.loadScripts, 250);
         }
     };
-	
+
     var checkLoadedScript = function(script) {
         var scriptLoaded = false;
         for (var i = 0; i < _loadedScripts.length; i++) {
@@ -482,20 +483,20 @@ Bootstrap = function() {
         }
         return scriptLoaded;
     };
-	
+
     var parseTimeStamp = function(date) {
         var hours = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
         var minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
         var seconds = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
         return hours + ':' + minutes + ':' + seconds + ':' + date.getMilliseconds();
     };
-    
+
     /***
 	 * parseUri JS v0.1, by Steven Levithan (http://badassery.blogspot.com)
 	 * Splits any well-formed URI into the following parts (all are optional):
-	 * 
+	 *
 	 * @param {Object} sourceUri
-	 * 
+	 *
 	 * returns:
 	 * source (since the exec() method returns backreference 0 [i.e., the entire match] as key 0, we might as well use it)
 	 * protocol (scheme)
@@ -512,26 +513,26 @@ Bootstrap = function() {
 		var uriPartNames = ["source", "protocol", "authority", "domain", "port", "path", "directoryPath", "fileName", "query", "anchor"];
 		var uriParts = new RegExp("^(?:([^:/?#.]+):)?(?://)?(([^:/?#]*)(?::(\\d*))?)?((/(?:[^?#](?![^?#/]*\\.[^?#/.]+(?:[\\?#]|$)))*/?)?([^?#/]*))?(?:\\?([^#]*))?(?:#(.*))?").exec(sourceUri);
 		var uri = {};
-		
+
 		for (var i = 0; i < 10; i++) {
 			uri[uriPartNames[i]] = (uriParts[i] ? uriParts[i] : "");
 		}
-		
+
 		// Always end directoryPath with a trailing backslash if a path was present in the source URI
 		// Note that a trailing backslash is NOT automatically inserted within or appended to the "path" key
 		if (uri.directoryPath.length > 0) {
 			uri.directoryPath = uri.directoryPath.replace(/\/?$/, "/");
 		}
-		
+
 		return uri;
 	};
-    
+
     var parseBootstrapFile = function() {
         var bootstrap = null;
-        
+
         var uri = parseUri(window.location);
         if (uri.query == null || uri.query == '') return bootstrap;
-        
+
         // Parse for bootstrap param.
         var query = unescape(uri.query);
         var params = query.split('&');
@@ -558,7 +559,7 @@ Bootstrap = function() {
             // Capture global start time.
             var now = new Date();
             _startTime = now.getTime();
-            
+
             var bootstrap = parseBootstrapFile();
 
             // Load default bootstrap if not defined.
@@ -573,15 +574,15 @@ Bootstrap = function() {
         log: function(message) {
 			if (typeof(console) != 'undefined') {
                 var timestamp = parseTimeStamp(new Date());
-                
+
 				console.log(timestamp + ' - ' + message);
 			}
         },
-		
+
 		getAnimTarget: function() {
 			return _animTarget;
 		},
-		
+
 		getBootstrap: function() {
 			return _bootstrap;
 		},
@@ -596,21 +597,21 @@ Bootstrap = function() {
                 }
             }
         },
-        
+
         isSplashShowing: function() {
         	return (_splashDiv.style.visibility == 'visible');
         },
-		
+
 		showSplash: function(hideLoader) {
             _splashDiv.style.visibility = 'visible';
-            
+
             if ((typeof(hideLoader) != 'undefined') && hideLoader) {
                 _loaderDiv.style.visibility = 'hidden';
             } else {
                 _loaderDiv.style.visibility = 'visible';
             }
         },
-        
+
         hideSplash: function() {
             _splashDiv.style.visibility = 'hidden';
             _loaderDiv.style.visibility = 'hidden';
@@ -633,7 +634,7 @@ Bootstrap = function() {
 
 			try {
             	loadBootGroup(_bootstrap.bootOrder[_currentBootSequence]);
-				
+
 			} catch (e) { alert(e); }
         },
 
@@ -650,11 +651,11 @@ Bootstrap = function() {
         addToBootOrder: function(name) {
             _bootstrap.bootOrder.push(name);
         },
-        
+
         isBootGroupLoaded: function(name) {
             var bootGroup = fetchBootGroup(name);
             var scriptsLoaded = 0;
-        	
+
         	// Iterate through bootGroup, checking each file against loaded scripts.
         	for (var i = 0; i < bootGroup.files.length; i++) {
                 var script = bootGroup.files[i];
@@ -665,15 +666,15 @@ Bootstrap = function() {
         			scriptsLoaded++;
         		}
         	}
-        	
+
         	return (bootGroup.files.length == scriptsLoaded);
         },
-		
+
 		report: function() {
 			var msPerSecond = 60 * 1000;
             var loadTime = (_finishTime - _startTime) / msPerSecond;
             Bootstrap.log('Load time: ' + loadTime + ' seconds');
-			
+
 			for (var i = 0; i < _bootstrap.bootOrder.length; i++) {
 				var bootGroup = fetchBootGroup(_bootstrap.bootOrder[i]);
 				var bootGroupLoadTime = (bootGroup.finishTime - bootGroup.startTime) / msPerSecond;
