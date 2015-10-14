@@ -26,8 +26,8 @@ Bootstrap = function() {
     /**
      * Browser checks taken and modified from ExtJS source.
      *
-     * Ext JS Library 3.3.1
-     * Copyright(c) 2006-2010 Sencha Inc.
+     * Ext JS Library 3.4.1.1
+     * Copyright(c) 2006-2013 Sencha Inc.
      * licensing@sencha.com
      * http://www.sencha.com/license
      */
@@ -38,10 +38,12 @@ Bootstrap = function() {
     };
     var _isOpera = check(/opera/);
     var _isIE = !_isOpera && check(/msie/);
-    var _isIE7 = _isIE && (check(/msie 7/) || _docMode == 7);
-    var _isIE8 = _isIE && (check(/msie 8/) && _docMode != 7);
-    var _isIE6 = _isIE && !_isIE7 && !_isIE8;
-
+    var _isIE7 = _isIE && ((check(/msie 7/) && _docMode != 8 && _docMode != 9 && _docMode != 10) || _docMode == 7);
+    var _isIE8 = _isIE && ((check(/msie 8/) && _docMode != 7 && _docMode != 9 && _docMode != 10) || _docMode == 8);
+    var _isIE9 = _isIE && ((check(/msie 9/) && _docMode != 7 && _docMode != 8 && _docMode != 10) || _docMode == 9);
+    var _isIE10 = _isIE && ((check(/msie 10/) && _docMode != 7 && _docMode != 8 && _docMode != 9) || _docMode == 10);
+    var _isIE6 = _isIE && check(/msie 6/);
+    var _isIE9m = _isIE && (_isIE6 || _isIE7 || _isIE8 || _isIE9);
 
 
     /** PRIVATE METHODS */
@@ -351,6 +353,9 @@ Bootstrap = function() {
                 if (script.ieVersion == '6' && _isIE6) config.ieUri = script.ieUri;
                 if (script.ieVersion == '7' && _isIE7) config.ieUri = script.ieUri;
                 if (script.ieVersion == '8' && _isIE8) config.ieUri = script.ieUri;
+                if (script.ieVersion == '9' && _isIE9) config.ieUri = script.ieUri;
+                if (script.ieVersion == '9m' && _isIE9m) config.ieUri = script.ieUri;
+                if (script.ieVersion == '10' && _isIE10) config.ieUri = script.ieUri;
             } else {
                 config.ieUri = script.ieUri;
             }
@@ -362,6 +367,9 @@ Bootstrap = function() {
                 if (script.ieVersion == '6' && _isIE6) config.ieTest = script.ieTest;
                 if (script.ieVersion == '7' && _isIE7) config.ieTest = script.ieTest;
                 if (script.ieVersion == '8' && _isIE8) config.ieTest = script.ieTest;
+                if (script.ieVersion == '9' && _isIE9) config.ieTest = script.ieTest;
+                if (script.ieVersion == '9m' && _isIE9m) config.ieTest = script.ieTest;
+                if (script.ieVersion == '10' && _isIE10) config.ieTest = script.ieTest;
             } else {
                 config.ieTest = script.ieTest;
             }
