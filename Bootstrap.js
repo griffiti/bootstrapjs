@@ -231,8 +231,8 @@ Bootstrap = function() {
 		_splashDiv.style.position = splash.position;
 		_splashDiv.style.border = splash.border;
 		_splashDiv.style.background = splash.background;
-		_splashDiv.style.width = splash.width + 'px';
-		_splashDiv.style.height = splash.height + 'px';
+		_splashDiv.style.width = splash.width;
+		_splashDiv.style.height = splash.height;
 		_splashDiv.style.zIndex = splash.zIndex;
 	};
 
@@ -262,12 +262,11 @@ Bootstrap = function() {
     };
 
 	var centerSplashDiv = function() {
-		// var centerTop = (document.body.clientHeight - _bootstrap.splash.height) / 2;
-        var centerTop = (window.innerHeight - _bootstrap.splash.height) / 2;
+		var centerTop = (document.body.clientHeight - _bootstrap.splash.height) / 2;
         var centerLeft = (document.body.clientWidth - _bootstrap.splash.width) / 2;
 
-		_splashDiv.style.left = centerLeft + document.body.scrollLeft + 'px';
-        _splashDiv.style.top = centerTop + document.body.scrollTop + 'px';
+		_splashDiv.style.left = centerLeft + document.body.scrollLeft;
+        _splashDiv.style.top = centerTop + document.body.scrollTop;
 	};
 
     var addEventHandlers = function() {
